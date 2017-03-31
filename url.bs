@@ -354,8 +354,8 @@ requires context to be distinguished.
 
 <h3 id=host-parsing>Host parsing</h3>
 
-<p>The <dfn id=concept-host-parser>host parser</dfn> takes a string <var>input</var>, a boolean
-<var>isSpecial</var>, and then runs these steps:
+<p>The <dfn export id=concept-host-parser lt="host parser|host parsing">host parser</dfn> takes a
+string <var>input</var> with a boolean <var>isSpecial</var>, and then runs these steps:
 
 <ol>
  <li>
@@ -1725,8 +1725,8 @@ string <var>input</var>, optionally with a <a>base URL</a> <var>base</var>, opti
        <li><p>If <var>buffer</var> is the empty string, <a>validation error</a>, return failure.
        <!-- No URLs with port, but without host. -->
 
-       <li><p>Let <var>host</var> be the result of <a lt="host parser">host parsing</a>
-       <var>buffer</var> with <var>url</var> <a>is special</a>.
+       <li><p>Let <var>host</var> be the result of <a>host parsing</a> <var>buffer</var> with
+       <var>url</var> <a>is special</a>.
 
        <li><p>If <var>host</var> is failure, then return failure.
 
@@ -1757,8 +1757,8 @@ string <var>input</var>, optionally with a <a>base URL</a> <var>base</var>, opti
        string, and either <var>url</var> <a>includes credentials</a> or <var>url</var>'s
        <a for=url>port</a> is non-null, <a>validation error</a>, return.
 
-       <li><p>Let <var>host</var> be the result of <a lt="host parser">host parsing</a>
-       <var>buffer</var> with <var>url</var> <a>is special</a>.
+       <li><p>Let <var>host</var> be the result of <a>host parsing</a> <var>buffer</var> with
+       <var>url</var> <a>is special</a>.
 
        <li><p>If <var>host</var> is failure, then return failure.
 
@@ -1962,8 +1962,8 @@ string <var>input</var>, optionally with a <a>base URL</a> <var>base</var>, opti
         <p>Otherwise, run these steps:
 
         <ol>
-         <li><p>Let <var>host</var> be the result of <a lt="host parser">host parsing</a>
-         <var>buffer</var> with <var>url</var> <a>is special</a>.
+         <li><p>Let <var>host</var> be the result of <a>host parsing</a> <var>buffer</var> with
+         <var>url</var> <a>is special</a>.
 
          <li><p>If <var>host</var> is failure, then return failure.
 
@@ -2609,14 +2609,13 @@ URLPath would be a subclassed Array? -->
    <li><p>Let <var>parsedBase</var> be the result of running the <a>basic URL parser</a> on
    <var>base</var>.
 
-   <li><p>If <var>parsedBase</var> is failure, then <a>throw</a> a <code>TypeError</code> exception.
+   <li><p>If <var>parsedBase</var> is failure, then <a>throw</a> a {{TypeError}}.
   </ol>
 
  <li><p>Let <var>parsedURL</var> be the result of running the <a>basic URL parser</a> on
  <var>url</var> with <var>parsedBase</var>.
 
- <li><p>If <var>parsedURL</var> is failure, <a>throw</a> a <code>TypeError</code>
- exception.
+ <li><p>If <var>parsedURL</var> is failure, <a>throw</a> a {{TypeError}}.
 
  <li><p>Let <var>query</var> be <var>parsedURL</var>'s <a for=url>query</a>, if that is non-null,
  and the empty string otherwise.
@@ -2677,7 +2676,7 @@ url.pathname // "/%F0%9F%8F%B3%EF%B8%8F%E2%80%8D%F0%9F%8C%88"</code></pre>
  <li><p>Let <var>parsedURL</var> be the result of running the <a>basic URL parser</a> on the given
  value.
 
- <li><p>If <var>parsedURL</var> is failure, <a>throw</a> a <code>TypeError</code> exception.
+ <li><p>If <var>parsedURL</var> is failure, <a>throw</a> a {{TypeError}}.
 
  <li><p>Set <a>context object</a>'s <a for=URL>url</a> to <var>parsedURL</var>.
 
@@ -3066,7 +3065,7 @@ these steps:
 <a for=URLSearchParams>list</a> name-value pairs with the key being
 the name and the value being the value.
 
-<p>The <dfn dfn for=URLSearchParams>stringification behavior</dfn> must return the
+<p>The <dfn for=URLSearchParams>stringification behavior</dfn> must return the
 <a lt='urlencoded serializer'>serialization</a> of the {{URLSearchParams}} object's
 <a for=URLSearchParams>list</a>.
 
@@ -3088,6 +3087,65 @@ e.g., "newURL" and "oldURL".
 
 <p class=note>The {{EventSource}} and {{HashChangeEvent}} interfaces in HTML are examples of proper
 naming. [[!HTML]]
+
+
+<h3 id=urlhost-class>URLHost class</h3>
+
+<pre class=idl>
+[Constructor(USVString host),
+ Exposed=(Window,Worker)]
+interface URLHost {
+  USVString unicode();
+  readonly attribute URLHostType type;
+
+  stringifier USVString toJSON();
+};
+
+enum URLHostType { "ipv4", "ipv6", "domain" };</pre>
+
+<p>Each {{URLHost}} object has an associated <dfn for=URLHost>host</dfn> (a <a for=/>host</a>).
+
+<hr>
+
+<p>The <dfn constructor for=URLHost><code>URLHost(<var>input</var>)</code></dfn> constructor, when
+invoked, must run these steps:
+
+<ol>
+ <li><p>Let <var>host</var> be the result of <a>host parsing</a> <var>input</var> with true.
+
+ <li><p>If <var>host</var> is failure, then <a>throw</a> a {{TypeError}}.
+
+ <li><p>Return a new {{URLHost}} object whose <a for=URLHost>host</a> is <var>host</var>.
+</ol>
+
+<p>The <dfn method for=URLHost><code>unicode()</code></dfn> method, when invoked, must run these
+steps:
+
+<ol>
+ <li><p>If <a>context object</a>'s <a for=URLHost>host</a> is not a <a>domain</a>, then <a>throw</a>
+ a {{TypeError}}.
+
+ <li><p>Let <var>unicodeDomain</var> be the result of running <a>domain to Unicode</a> on
+ <a>context object</a>'s <a for=URLHost>host</a>.
+
+ <li><p>Return <var>unicodeDomain</var>, <a lt="host serializer">serialized</a>.
+</ol>
+
+<p>The <dfn attribute for=URLHost><code>type</code></dfn> attribute's getter, must run these steps:
+
+<ol>
+ <li><p>If <a>context object</a>'s <a for=URLHost>host</a> is an <a>IPv4 address</a>, then return
+ "<code>ipv4</code>".
+
+ <li><p>If <a>context object</a>'s <a for=URLHost>host</a> is an <a>IPv6 address</a>, then return
+ "<code>ipv6</code>".
+
+ <li><p>Return "<code>domain</code>".
+</ol>
+
+<p>The <dfn for=URLHost>stringification behavior</dfn> and
+<dfn method for=URLHost><code>toJSON()</code></dfn> method, when invoked, must return
+<a>context object</a>'s <a for=URLHost>host</a>, <a lt="host serializer">serialized</a>.
 
 
 
@@ -3179,8 +3237,9 @@ Trevor Rowbotham,
 Valentin Gosu,
 Vyacheslav Matva,
 Wei Wang,
-山岸和利 (Yamagishi Kazutoshi), and
-成瀬ゆい (Yui Naruse)
+山岸和利 (Yamagishi Kazutoshi),
+成瀬ゆい (Yui Naruse), and
+Zach Lym
 for being awesome!
 
 <p>This standard is written by
